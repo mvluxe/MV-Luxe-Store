@@ -260,6 +260,93 @@ footer p:first-child {
   background: transparent;
   color: #d4af37;
 }
+  .checkout-panel {
+  position: fixed;
+  inset: 0;
+  background: #0b0b0b;
+  color: white;
+  z-index: 10000;
+  display: none;
+  overflow-y: auto;
+}
+
+.checkout-panel.open {
+  display: block;
+}
+
+.checkout-header {
+  position: sticky;
+  top: 0;
+  background: #050505;
+  border-bottom: 1px solid #d4af37;
+  padding: 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkout-header h2 {
+  margin: 0;
+  color: #d4af37;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.checkout-content {
+  max-width: 650px;
+  margin: auto;
+  padding: 30px 20px 60px;
+}
+
+.checkout-section,
+.checkout-summary {
+  background: #121212;
+  border: 1px solid #292929;
+  padding: 25px;
+  margin-bottom: 20px;
+}
+
+.checkout-section h3,
+.checkout-summary h3 {
+  margin-top: 0;
+  color: #d4af37;
+  letter-spacing: 1px;
+}
+
+.checkout-section input {
+  width: 100%;
+  background: #0b0b0b;
+  color: white;
+  border: 1px solid #333;
+  padding: 15px;
+  margin-top: 12px;
+  font-size: 15px;
+}
+
+.checkout-section input:focus {
+  outline: none;
+  border-color: #d4af37;
+}
+
+.checkout-total {
+  border-top: 1px solid #333;
+  margin-top: 20px;
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 20px;
+}
+
+.checkout-total strong {
+  color: #d4af37;
+}
+
+.secure-text {
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+  margin-top: 15px;
+}
 </style>
 </head>
 
@@ -295,9 +382,9 @@ footer p:first-child {
     <h3 id="cart-total">R0</h3>
   </div>
 
-  <button class="checkout-button">
-    SECURE CHECKOUT
-  </button>
+  <button class="checkout-button" onclick="openCheckout()">
+  SECURE CHECKOUT
+</button>
 
 </div>
 
@@ -433,6 +520,282 @@ function updateCart() {
 
   cartCount.textContent = totalItems;
   cartTotal.textContent = "R" + totalPrice;
+}
+  function openCheckout() {
+  if (cart.length === 0) {
+    alert("Your bag is empty.");
+    return;
+  }
+
+  updateCheckoutSummary();
+
+  document
+    .getElementById("checkout-panel")
+    .classList.add("open");
+}
+
+function closeCheckout() {
+  document
+    .getElementById("checkout-panel")
+    .classList.remove("open");
+}
+
+function updateCheckoutSummary() {
+  const checkoutItems =
+    document.getElementById("checkout-items");
+
+  const checkoutTotal =
+    document.getElementById("checkout-total");
+
+  let total = 0;
+
+  checkoutItems.innerHTML = "";
+
+  cart.forEach(item => {
+    const itemTotal =
+      item.price * item.quantity;
+
+    total += itemTotal;
+
+    checkoutItems.innerHTML += `
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        padding:10px 0;
+        border-bottom:1px solid #292929;
+      ">
+        <span>
+          ${item.name} × ${item.quantity}
+        </span>
+
+        <span>
+          R${itemTotal}
+        </span>
+      </div>
+    `;
+  });
+
+  checkoutTotal.textContent = "R" + total;
+}
+
+function placeOrder() {
+  const name =
+    document.getElementById("checkout-name").value.trim();
+
+  const email =
+    document.getElementById("checkout-email").value.trim();
+
+  const phone =
+    document.getElementById("checkout-phone").value.trim();
+
+  const address =
+    document.getElementById("checkout-address").value.trim();
+
+  const city =
+    document.getElementById("checkout-city").value.trim();
+
+  const province =
+    document.getElementById("checkout-province").value.trim();
+
+  const postal =
+    document.getElementById("checkout-postal").value.trim();
+
+  if (
+    !name ||
+    !email ||
+    !phone ||
+    !address ||
+    !city ||
+    !province ||
+    !postal
+  ) {
+    alert("Please complete all delivery details.");
+    return;
+  }
+
+  alert(
+    "Thank you, " +
+    name +
+    "! Your order details are ready. The next step is secure payment."
+  );
+}
+</script>
+
+  <div id="checkout-panel" class="checkout-panel">
+
+  <div class="checkout-header">
+    <h2>Secure Checkout</h2>
+
+    <button class="close-cart" onclick="closeCheckout()">
+      ✕
+    </button>
+  </div>
+
+  <div class="checkout-content">
+
+    <div class="checkout-section">
+      <h3>Contact Details</h3>
+
+      <input
+        type="text"
+        id="checkout-name"
+        placeholder="Full Name">
+
+      <input
+        type="email"
+        id="checkout-email"
+        placeholder="Email Address">
+
+      <input
+        type="tel"
+        id="checkout-phone"
+        placeholder="Phone Number">
+    </div>
+
+    <div class="checkout-section">
+      <h3>Delivery Address</h3>
+
+      <input
+        type="text"
+        id="checkout-address"
+        placeholder="Street Address">
+
+      <input
+        type="text"
+        id="checkout-city"
+        placeholder="City">
+
+      <input
+        type="text"
+        id="checkout-province"
+        placeholder="Province">
+
+      <input
+        type="text"
+        id="checkout-postal"
+        placeholder="Postal Code">
+    </div>
+
+    <div class="checkout-summary">
+      <h3>Order Summary</h3>
+
+      <div id="checkout-items"></div>
+
+      <div class="checkout-total">
+        <span>Total</span>
+        <strong id="checkout-total">R0</strong>
+      </div>
+    </div>
+
+    <button
+      class="checkout-button"
+      onclick="placeOrder()">
+
+      CONTINUE TO PAYMENT
+
+    </button>
+
+    <p class="secure-text">
+      🔒 Your payment will be processed securely.
+    </p>
+
+  </div>
+
+</div>
+
+<script>
+function openCheckout() {
+  if (cart.length === 0) {
+    alert("Your bag is empty.");
+    return;
+  }
+
+  updateCheckoutSummary();
+
+  document
+    .getElementById("checkout-panel")
+    .classList.add("open");
+}
+
+function closeCheckout() {
+  document
+    .getElementById("checkout-panel")
+    .classList.remove("open");
+}
+
+function updateCheckoutSummary() {
+  const checkoutItems =
+    document.getElementById("checkout-items");
+
+  const checkoutTotal =
+    document.getElementById("checkout-total");
+
+  let total = 0;
+
+  checkoutItems.innerHTML = "";
+
+  cart.forEach(item => {
+    const itemTotal =
+      item.price * item.quantity;
+
+    total += itemTotal;
+
+    checkoutItems.innerHTML += `
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        padding:10px 0;
+        border-bottom:1px solid #292929;
+      ">
+        <span>${item.name} × ${item.quantity}</span>
+        <span>R${itemTotal}</span>
+      </div>
+    `;
+  });
+
+  checkoutTotal.textContent = "R" + total;
+}
+
+function placeOrder() {
+  const name =
+    document.getElementById("checkout-name").value.trim();
+
+  const email =
+    document.getElementById("checkout-email").value.trim();
+
+  const phone =
+    document.getElementById("checkout-phone").value.trim();
+
+  const address =
+    document.getElementById("checkout-address").value.trim();
+
+  const city =
+    document.getElementById("checkout-city").value.trim();
+
+  const province =
+    document.getElementById("checkout-province").value.trim();
+
+  const postal =
+    document.getElementById("checkout-postal").value.trim();
+
+  if (
+    !name ||
+    !email ||
+    !phone ||
+    !address ||
+    !city ||
+    !province ||
+    !postal
+  ) {
+    alert("Please complete all delivery details.");
+    return;
+  }
+
+  alert(
+    "Thank you, " +
+    name +
+    "! Your order details are ready. The next step is secure payment."
+  );
 }
 </script>
   
