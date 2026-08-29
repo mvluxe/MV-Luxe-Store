@@ -149,15 +149,157 @@ footer p:first-child {
   color: #d4af37;
   letter-spacing: 2px;
 }
+
+  .brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1000px;
+  margin: auto;
+}
+
+.cart-button {
+  background: transparent;
+  color: #d4af37;
+  border: 1px solid #d4af37;
+  padding: 10px 14px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.cart-button:hover {
+  background: #d4af37;
+  color: #111;
+}
+  .cart-panel {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  background: #0b0b0b;
+  color: white;
+  z-index: 9999;
+  padding: 25px;
+  border-left: 1px solid #d4af37;
+  transition: right 0.35s ease;
+  overflow-y: auto;
+}
+
+.cart-panel.open {
+  right: 0;
+}
+
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #333;
+  padding-bottom: 20px;
+}
+
+.cart-header h2 {
+  color: #d4af37;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.close-cart {
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+#cart-items {
+  padding: 25px 0;
+}
+
+.empty-cart {
+  color: #aaa;
+  text-align: center;
+  padding: 30px 0;
+}
+
+.cart-total {
+  border-top: 1px solid #333;
+  padding: 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-total p {
+  margin: 0;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cart-total h3 {
+  margin: 0;
+  color: #d4af37;
+  font-size: 24px;
+}
+
+.checkout-button {
+  width: 100%;
+  background: #d4af37;
+  color: #111;
+  border: 1px solid #d4af37;
+  padding: 16px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.checkout-button:hover {
+  background: transparent;
+  color: #d4af37;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>MV LUXE</h1>
+  <div class="brand">
+    <h1>MV LUXE</h1>
+    <button class="cart-button" onclick="toggleCart()">
+      🛒 BAG (<span id="cart-count">0</span>)
+    </button>
+  </div>
+
   <p>Smart Living. Beautifully Simple.</p>
 </header>
+
+  <div id="cart-panel" class="cart-panel">
+
+  <div class="cart-header">
+    <h2>Your Bag</h2>
+
+    <button class="close-cart" onclick="toggleCart()">
+      ✕
+    </button>
+  </div>
+
+  <div id="cart-items">
+    <p class="empty-cart">Your bag is currently empty.</p>
+  </div>
+
+  <div class="cart-total">
+    <p>Total</p>
+    <h3 id="cart-total">R0</h3>
+  </div>
+
+  <button class="checkout-button">
+    SECURE CHECKOUT
+  </button>
+
+</div>
 
 <section class="hero">
   <h2>Welcome to MV Luxe</h2>
@@ -197,8 +339,100 @@ footer p:first-child {
 </footer>
   
 <script>
+let cart = [];
+const PRODUCT_NAME = "Electric Spin Scrubber";
+const PRODUCT_PRICE = 449;
+
 function addToCart() {
-  alert("Electric Spin Scrubber has been added to your bag! 🛒");
+  const existingItem = cart.find(item => item.name === PRODUCT_NAME);
+
+  if (existingItem) {
+    existingItem.quantity++;
+  } else {
+    cart.push({
+      name: PRODUCT_NAME,
+      price: PRODUCT_PRICE,
+      quantity: 1
+    });
+  }
+
+  updateCart();
+  openCart();
+}
+
+function toggleCart() {
+  document.getElementById("cart-panel").classList.toggle("open");
+}
+
+function openCart() {
+  document.getElementById("cart-panel").classList.add("open");
+}
+
+function changeQuantity(amount) {
+  if (cart.length === 0) return;
+
+  cart[0].quantity += amount;
+
+  if (cart[0].quantity <= 0) {
+    cart = [];
+  }
+
+  updateCart();
+}
+
+function removeItem() {
+  cart = [];
+  updateCart();
+}
+
+function updateCart() {
+  const cartItems = document.getElementById("cart-items");
+  const cartCount = document.getElementById("cart-count");
+  const cartTotal = document.getElementById("cart-total");
+
+  let totalItems = 0;
+  let totalPrice = 0;
+
+  cartItems.innerHTML = "";
+
+  if (cart.length === 0) {
+    cartItems.innerHTML =
+      '<p class="empty-cart">Your bag is currently empty.</p>';
+  }
+
+  cart.forEach(item => {
+    totalItems += item.quantity;
+    totalPrice += item.price * item.quantity;
+
+    cartItems.innerHTML += `
+      <div style="border-bottom:1px solid #333; padding:15px 0;">
+        <h3 style="margin:0 0 8px; color:#fff;">
+          ${item.name}
+        </h3>
+
+        <p style="color:#d4af37; margin:5px 0;">
+          R${item.price}
+        </p>
+
+        <div style="display:flex; align-items:center; gap:10px; margin-top:12px;">
+          <button onclick="changeQuantity(-1)">−</button>
+
+          <span>${item.quantity}</span>
+
+          <button onclick="changeQuantity(1)">+</button>
+
+          <button
+            onclick="removeItem()"
+            style="margin-left:auto;">
+            Remove
+          </button>
+        </div>
+      </div>
+    `;
+  });
+
+  cartCount.textContent = totalItems;
+  cartTotal.textContent = "R" + totalPrice;
 }
 </script>
   
