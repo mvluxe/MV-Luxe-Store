@@ -804,7 +804,7 @@ function updateCheckoutSummary() {
   checkoutTotal.textContent = "R" + total;
 }
 
-function placeOrder() {
+async function placeOrder() {
   const name =
     document.getElementById("checkout-name").value.trim();
 
@@ -839,11 +839,62 @@ function placeOrder() {
     return;
   }
 
-  alert(
-    "Thank you, " +
-    name +
-    "! Your order details are ready. The next step is secure payment."
-  );
+  const totalElement =
+    document.getElementById("checkout-total");
+
+  const amount =
+    totalElement.innerText
+      .replace("R", "")
+      .replace(",", "")
+      .trim();
+
+  if (!amount || isNaN(amount) || Number(amount) <= 0) {
+    alert("Your order total could not be calculated.");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "https://mv-luxe-payfast.siphamandlankosimvango.workers.dev/create-payment",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          phone: phone,
+          address: address,
+          city: city,
+          province: province,
+          postal: postal,
+          amount: Number(amount)
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Payment request failed."
+      );
+    }
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Payment could not be started.");
+    }
+
+  } catch (error) {
+    console.error("PayFast error:", error);
+
+    alert(
+      "We could not connect to secure payment. Please try again."
+    );
+  }
 }
 </script>
   
