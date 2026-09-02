@@ -884,11 +884,14 @@ async function placeOrder() {
       );
     }
 
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert("Payment could not be started.");
-    }
+    if (data.payment_url) {
+  window.location.href = data.payment_url;
+} else {
+  alert(
+    "PayFast response:\n\n" +
+    JSON.stringify(data, null, 2)
+  );
+}
 
   } catch (error) {
     console.error("PayFast error:", error);
