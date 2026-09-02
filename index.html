@@ -884,8 +884,25 @@ async function placeOrder() {
       );
     }
 
-    if (data.payment_url) {
-  window.location.href = data.payment_url;
+     if (data.success && data.paymentData) {
+  const form = document.createElement("form");
+
+  form.method = "POST";
+  form.action = "https://www.payfast.co.za/eng/process";
+
+  Object.keys(data.paymentData).forEach((key) => {
+    const input = document.createElement("input");
+
+    input.type = "hidden";
+    input.name = key;
+    input.value = data.paymentData[key];
+
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+
 } else {
   alert(
     "PayFast response:\n\n" +
